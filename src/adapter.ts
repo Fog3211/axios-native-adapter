@@ -1,16 +1,16 @@
-import axios, { AxiosAdapter, AxiosInstance, AxiosRequestConfig } from "axios";
+import axios, { InternalAxiosRequestConfig } from "axios";
 
-interface ApiRequestConfig extends AxiosRequestConfig {
-
+export type AdapterOptions = {
+  enable?: boolean | ((config: InternalAxiosRequestConfig) => boolean)
 }
 
-export const adapter = (url) => (config: AxiosRequestConfig) => {
-  console.log(config)
-  if (
-    /kanqiu|huputiyu/g.test(navigator.userAgent)
-    ||
-    (config.baseURL + config.url).includes(url)
-  ) {
+export const adapter = (
+  options: AdapterOptions
+) => async (config: InternalAxiosRequestConfig) => {
+  const { enable = true } = options
+  const isUseOriginalAdapter = !(typeof enable === 'function' ? enable(config) : enable)
+
+  if (!isUseOriginalAdapter) {
     return Promise.resolve({
       data: 11
     }).then((bridgeResponse) => {
